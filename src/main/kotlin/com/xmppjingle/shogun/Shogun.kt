@@ -55,7 +55,6 @@ class Shogun {
                 while (j < firstWord.length) {
                     if (!encoder.canEncode(firstWord[j])) {
                         i = j + 1
-                        break
                     }
                     j++
                 }
