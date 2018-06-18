@@ -1,6 +1,7 @@
 package com.xmppjingle.shogun
 
 import java.nio.charset.Charset
+import java.nio.charset.CharsetEncoder
 import java.util.*
 
 class Shogun {
@@ -19,7 +20,7 @@ class Shogun {
 //            ordered.forEach({ println(it) })
                 if (ordered.isEmpty()) break
                 val entry = ordered[0]
-                val rp = (166 + i).toChar()
+                val rp = (257 + i).toChar()
 //                println("$entry for $rp")
                 dict.put(entry.first, rp)
                 cr = cr.replace(entry.first, "$rp", false)
@@ -36,7 +37,7 @@ class Shogun {
             var uncr = payload
             dict.forEach {
                 uncr = uncr.replace("${it.value}", it.key)
-                println("Hanoi Partial: ${uncr}")
+//                println("Hanoi Partial: ${uncr}")
             }
             println("Hanoi Stacked Size: ${uncr.length}")
 
@@ -48,32 +49,40 @@ class Shogun {
             val encoder = charset.newEncoder()
             for (wl in minWl..(maxWl)) {
 //                println("Breaking on $wl...")
-                if(wl >= payload.length) break
-                var i = 0
-                val firstWord = payload.slice(i..(wl + i))
-                var j = 0
-                while (j < firstWord.length) {
-                    if (!encoder.canEncode(firstWord[j])) {
-                        i = j + 1
-                    }
-                    j++
-                }
-
+                if (wl >= payload.length) break
+                var i = validCut(payload.slice(0..(wl + 0)), encoder)
                 while (i < (payload.length - wl - 1)) {
                     val word = payload.slice(i..(wl + i))
-                    if (encoder.canEncode(word[wl - 1])) {
+                    val cut = validCut(word, encoder)
+                    if (cut != i) {
+                        i += cut
+                        break
+                    }
+                    if (encoder.canEncode(word[wl])) {
                         t.computeIfPresent(word, { _, u -> u + wl + 1 })
                         t.computeIfAbsent(word, { wl })
-                        println(word)
+//                        println(word)
                         i++
                     } else {
-                        i += wl
+                        i += wl + 1
                     }
                 }
             }
             val ordered = t.toList().sortedBy { (_, v) -> v }
             if (ordered.isEmpty()) return ordered
-            return ordered.reversed().subList(0, if (ordered.size > top) top else ordered.size)
+            return ordered.filter { it.second > 1 }.reversed().subList(0, if (ordered.size > top) top else ordered.size)
+        }
+
+        fun validCut(word: String, encoder: CharsetEncoder): Int {
+            var i = 0
+            var j = 0
+            while (j < word.length) {
+                if (!encoder.canEncode(word[j])) {
+                    i = j + 1
+                }
+                j++
+            }
+            return i
         }
 
     }
