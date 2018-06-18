@@ -17,8 +17,17 @@ class ShogunTester {
 
         val p = Shogun.crunch(testInput, 5, 12, 4, Charsets.US_ASCII)
 
+        val t = p.first.replace("${p.second.values.elementAt(0)}", "Test")
+
         assertEquals(testInput, Shogun.hanoi(p.first, p.second))
 
+    }
+
+    @Test
+    fun testDumbReplace(){
+
+        val op = (165).toChar()
+        assertEquals("Post@©", "$op@©".replace("¥", "Post"))
     }
 
 

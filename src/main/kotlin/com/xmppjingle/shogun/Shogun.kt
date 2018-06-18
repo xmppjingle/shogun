@@ -35,7 +35,8 @@ class Shogun {
         fun hanoi(payload: String, dict: HashMap<String, Char>): String {
             var uncr = payload
             dict.forEach {
-                uncr = uncr.replace("$it.value", it.key, false)
+                uncr = uncr.replace("${it.value}", it.key)
+                println("Hanoi Partial: ${uncr}")
             }
             println("Hanoi Stacked Size: ${uncr.length}")
 
