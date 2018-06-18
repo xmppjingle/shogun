@@ -37,7 +37,7 @@ class Shogun {
             dict.forEach {
                 uncr = uncr.replace("$it.value", it.key, false)
             }
-            println("Unslashed Size: ${uncr.length}")
+            println("Hanoi Stacked Size: ${uncr.length}")
 
             return uncr
         }
