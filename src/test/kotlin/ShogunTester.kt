@@ -15,9 +15,7 @@ class ShogunTester {
 
         val testInput = "JingleNodesJingleNodesJingleTestNodesTestFinalNodesJingle"
 
-        val p = Shogun.crunch(testInput, 5, 12, 4, Charsets.US_ASCII)
-
-        val t = p.first.replace("${p.second.values.elementAt(0)}", "Test")
+        val p = Shogun.crunch(testInput, 4, 30, 6, Charsets.US_ASCII)
 
         assertEquals(testInput, Shogun.hanoi(p.first, p.second))
 

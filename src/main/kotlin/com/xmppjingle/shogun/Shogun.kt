@@ -50,27 +50,27 @@ class Shogun {
             for (wl in minWl..(maxWl)) {
 //                println("Breaking on $wl...")
                 if (wl >= payload.length) break
-                var i = validCut(payload.slice(0..(wl + 0)), encoder)
-                while (i < (payload.length - wl - 1)) {
-                    val word = payload.slice(i..(wl + i))
+                var i = validCut(payload.slice(0..(wl - 1)), encoder)
+                while (i < (payload.length - wl )) {
+                    val word = payload.slice(i..(wl + i - 1))
                     val cut = validCut(word, encoder)
-                    if (cut != i) {
+                    if (cut != 0) {
                         i += cut
-                        break
-                    }
-                    if (encoder.canEncode(word[wl])) {
-                        t.computeIfPresent(word, { _, u -> u + wl + 1 })
+
+                    }else{
+                    if (encoder.canEncode(word[wl-1])) {
+                        t.computeIfPresent(word, { _, u -> u + wl + 2 })
                         t.computeIfAbsent(word, { wl })
 //                        println(word)
                         i++
                     } else {
                         i += wl + 1
-                    }
+                    }}
                 }
             }
             val ordered = t.toList().sortedBy { (_, v) -> v }
             if (ordered.isEmpty()) return ordered
-            return ordered.filter { it.second > 1 }.reversed().subList(0, if (ordered.size > top) top else ordered.size)
+            return ordered.filter { it.second > it.first.length }.reversed()//.subList(0, if (ordered.size > top) top else ordered.size)
         }
 
         fun validCut(word: String, encoder: CharsetEncoder): Int {
@@ -78,7 +78,7 @@ class Shogun {
             var j = 0
             while (j < word.length) {
                 if (!encoder.canEncode(word[j])) {
-                    i = j + 1
+                    i = j +1
                 }
                 j++
             }
