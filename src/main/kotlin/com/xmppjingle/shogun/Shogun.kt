@@ -103,14 +103,12 @@ class Shogun {
         }
 
         fun exportDict(map: HashMap<String, Int>): String {
-            val mapper = ObjectMapper()
-            val jsonResult = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(map)
-            return jsonResult
+            Klaxon().
         }
 
         fun importDict(json: String):HashMap<String, Int>{
             val response = ObjectMapper().readValue(json, HashMap<String, Int>().javaClass)
-            return response
+            return Klaxon().parse<HashMap<String, Int>>(json)
         }
 
     }
