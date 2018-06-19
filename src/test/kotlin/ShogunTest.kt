@@ -19,6 +19,16 @@ class ShogunTester {
 
         assertEquals(testInput, Shogun.hanoi(p.first, p.second))
 
+        val jsonDict = Shogun.exportDict(p.second)
+
+        println(jsonDict)
+
+        val dict = Shogun.importDict(jsonDict)
+
+        assertEquals(p.second, dict)
+
+        println(dict)
+
     }
 
     @Test

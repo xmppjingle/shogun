@@ -1,6 +1,8 @@
 package com.xmppjingle.shogun
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.beust.klaxon.Converter
+import com.beust.klaxon.JsonValue
+import com.beust.klaxon.Klaxon
 import java.nio.charset.Charset
 import java.nio.charset.CharsetEncoder
 
@@ -9,12 +11,12 @@ class Shogun {
     companion object {
 
         fun crunch(payload: String, minWl: Int, maxWl: Int, layers: Int, charset: Charset) = crunch(payload, minWl, maxWl, layers, charset, emptyList())
-        fun crunch(payload: String, minWl: Int, maxWl: Int, layers: Int, charset: Charset, opening: List<String>): Pair<String, HashMap<String, Char>> {
+        fun crunch(payload: String, minWl: Int, maxWl: Int, layers: Int, charset: Charset, opening: List<String>): Pair<String, HashMap<String, Int>> {
 
             println("Original Size: ${payload.length}")
 
             val charsetSize = calcCharsetLength(charset)
-            val dict = HashMap<String, Char>()
+            val dict = HashMap<String, Int>()
             var cr = payload
 
             for (i in 0..(layers - 1)) {
@@ -28,7 +30,7 @@ class Shogun {
                     val entry = ordered[0]
                     entry.first
                 }
-                val rp = (charsetSize + i).toChar()
+                val rp = (charsetSize + i)
 //                println("$entry for $rp")
                 dict.put(word, rp)
                 cr = cr.replace(word, "$rp", false)
@@ -41,7 +43,7 @@ class Shogun {
 
         }
 
-        fun hanoi(payload: String, dict: HashMap<String, Char>): String {
+        fun hanoi(payload: String, dict: HashMap<String, Int>): String {
             var uncr = payload
             dict.forEach {
                 uncr = uncr.replace("${it.value}", it.key)
@@ -103,12 +105,16 @@ class Shogun {
         }
 
         fun exportDict(map: HashMap<String, Int>): String {
-            Klaxon().
+            return Klaxon().toJsonString(map)
         }
 
-        fun importDict(json: String):HashMap<String, Int>{
-            val response = ObjectMapper().readValue(json, HashMap<String, Int>().javaClass)
-            return Klaxon().parse<HashMap<String, Int>>(json)
+        fun importDict(json: String):HashMap<String, Int>?{
+            val mapConverter = object: Converter {
+                override fun fromJson(jv: JsonValue): HashMap<String, Any?> = HashMap(jv.obj!!)
+                override fun canConvert(cls: Class<*>): Boolean = true
+                override fun toJson(value: Any): String = ""
+            }
+            return Klaxon().converter(mapConverter).parse(json)
         }
 
     }
