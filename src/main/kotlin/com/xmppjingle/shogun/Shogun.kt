@@ -2,7 +2,6 @@ package com.xmppjingle.shogun
 
 import java.nio.charset.Charset
 import java.nio.charset.CharsetEncoder
-import java.util.*
 
 class Shogun {
 
@@ -13,21 +12,22 @@ class Shogun {
 
             println("Original Size: ${payload.length}")
 
+            val charsetSize = calcCharsetLength(charset)
             val dict = HashMap<String, Char>()
             var cr = payload
-            for (i in 0..layers) {
+
+            for (i in 0..(layers - 1)) {
 //            println(cr)
-                var word: String
-                if (i < opening.size) {
-                    word = opening[i]
+                val word = if (i < opening.size) {
+                    opening[i]
                 } else {
                     val ordered = slash(minWl, maxWl, layers, cr, charset)
-//            ordered.forEach({ println(it) })
+                    //            ordered.forEach({ println(it) })
                     if (ordered.isEmpty()) break
                     val entry = ordered[0]
-                    word = entry.first
+                    entry.first
                 }
-                val rp = (257 + i).toChar()
+                val rp = (charsetSize + i).toChar()
 //                println("$entry for $rp")
                 dict.put(word, rp)
                 cr = cr.replace(word, "$rp", false)
@@ -92,7 +92,20 @@ class Shogun {
             return i
         }
 
-    }
+        fun calcCharsetLength(charset: Charset): Int {
+            var i = 0
+            val encoder = charset.newEncoder()
+            while (encoder.canEncode(i.toChar())) {
+                i++
+            }
+            return i + 10
+        }
 
+        fun exportDict(){
+            val mapper = ObjectMapper()
+            val jsonResult = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(map)
+        }
+
+    }
 
 }
