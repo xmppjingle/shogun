@@ -1,5 +1,6 @@
 package com.xmppjingle.shogun
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import java.nio.charset.Charset
 import java.nio.charset.CharsetEncoder
 
@@ -101,9 +102,15 @@ class Shogun {
             return i + 10
         }
 
-        fun exportDict(){
+        fun exportDict(map: HashMap<String, Int>): String {
             val mapper = ObjectMapper()
             val jsonResult = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(map)
+            return jsonResult
+        }
+
+        fun importDict(json: String):HashMap<String, Int>{
+            val response = ObjectMapper().readValue(json, HashMap<String, Int>().javaClass)
+            return response
         }
 
     }
