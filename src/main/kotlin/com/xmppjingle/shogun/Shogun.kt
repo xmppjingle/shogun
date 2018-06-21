@@ -44,7 +44,7 @@ class Shogun {
 
         }
 
-        fun hanoi(payload: String, dict: HashMap<String, Int>): String {
+        fun uncrunch(payload: String, dict: HashMap<String, Int>): String {
             var uncr = payload
             dict.forEach {
                 uncr = uncr.replace("${it.value.toChar()}", it.key)
