@@ -3,6 +3,7 @@ package com.xmppjingle.shogun
 import com.beust.klaxon.Converter
 import com.beust.klaxon.JsonValue
 import com.beust.klaxon.Klaxon
+import java.io.File
 import java.nio.charset.Charset
 import java.nio.charset.CharsetEncoder
 
@@ -13,7 +14,7 @@ class Shogun {
         fun crunch(payload: String, minWl: Int, maxWl: Int, layers: Int, charset: Charset) = crunch(payload, minWl, maxWl, layers, charset, emptyList())
         fun crunch(payload: String, minWl: Int, maxWl: Int, layers: Int, charset: Charset, opening: List<String>): Pair<String, HashMap<String, Int>> {
 
-            println("Original Size: ${payload.length}")
+//            println("Original Size: ${payload.length}")
 
             val charsetSize = calcCharsetLength(charset)
             val dict = HashMap<String, Int>()
@@ -33,11 +34,11 @@ class Shogun {
                 val rp = (charsetSize + i)
 //                println("$entry for $rp")
                 dict.put(word, rp)
-                cr = cr.replace(word, "$rp", false)
+                cr = cr.replace(word, "${rp.toChar()}", false)
             }
 
 //            println("{{$cr}}")
-            println("Slashed Size: ${cr.length}")
+//            println("Slashed Size: ${cr.length}")
 
             return Pair(cr, dict)
 
@@ -46,7 +47,7 @@ class Shogun {
         fun hanoi(payload: String, dict: HashMap<String, Int>): String {
             var uncr = payload
             dict.forEach {
-                uncr = uncr.replace("${it.value}", it.key)
+                uncr = uncr.replace("${it.value.toChar()}", it.key)
 //                println("Hanoi Partial: ${uncr}")
             }
             println("Hanoi Stacked Size: ${uncr.length}")
@@ -108,14 +109,17 @@ class Shogun {
             return Klaxon().toJsonString(map)
         }
 
-        fun importDict(json: String):HashMap<String, Int>?{
-            val mapConverter = object: Converter {
+        fun importDict(json: String): HashMap<String, Int>? {
+            val mapConverter = object : Converter {
                 override fun fromJson(jv: JsonValue): HashMap<String, Any?> = HashMap(jv.obj!!)
                 override fun canConvert(cls: Class<*>): Boolean = true
                 override fun toJson(value: Any): String = ""
             }
             return Klaxon().converter(mapConverter).parse(json)
         }
+
+        fun readFileDirectlyAsText(fileName: String): String = readFileDirectlyAsText(File(fileName))
+        fun readFileDirectlyAsText(file: File): String = file.readText(Charsets.UTF_8)
 
     }
 
