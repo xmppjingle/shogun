@@ -13,7 +13,9 @@
 ./target
 .gradle
 ./build
-build/
+build/*
+out/
+*/*/.DS_Store
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
@@ -31,3 +33,6 @@ build/
 hs_err_pid*
 .idea/compiler.xml
 shogun.iml
+**/.DS_Store
+build/**
+build/kotlin-build/version.txt
