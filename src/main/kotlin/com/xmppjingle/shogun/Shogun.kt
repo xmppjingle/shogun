@@ -78,7 +78,7 @@ class Shogun {
                     }
                 }
             }
-            val ordered = t.toList().sortedBy { (k, v) -> v /*+ (k.length * wordLenBonus)*/ }
+            val ordered = t.toList().sortedBy { (_, v) -> v /*+ (k.length * wordLenBonus)*/ }
             if (ordered.isEmpty()) return ordered
             return ordered.filter { it.second > it.first.length }.reversed()//.subList(0, if (ordered.size > top) top else ordered.size)
         }
