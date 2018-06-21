@@ -19,11 +19,13 @@ defaultTasks 'run'
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    compile 'com.github.erluxman:jitpackandroidutil:1.0.0'
 
     compile "com.beust:klaxon:3.0.3"
 
