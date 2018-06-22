@@ -47,6 +47,9 @@ class Shogun {
 
         }
 
+        fun crunch(payload: String, dict: ShogunDictionary): String =
+                crunch(payload, dict.map)
+
         fun crunch(payload: String, dict: HashMap<String, Int>): String {
             var crunched = payload
             dict.forEach {
@@ -57,6 +60,9 @@ class Shogun {
 
             return crunched
         }
+
+        fun uncrunch(payload: String, dict: ShogunDictionary): String =
+                uncrunch(payload, dict.map)
 
         fun uncrunch(payload: String, dict: HashMap<String, Int>): String {
             var uncr = payload
