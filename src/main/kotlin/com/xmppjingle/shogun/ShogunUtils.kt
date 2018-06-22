@@ -26,13 +26,13 @@ class ShogunUtils {
             return Klaxon().toJsonString(map)
         }
 
-        fun importDict(json: String): ShogunDict? {
+        fun importDict(json: String): ShogunDictionary? {
             val mapConverter = object : Converter {
                 override fun fromJson(jv: JsonValue): HashMap<String, Any?> = HashMap(jv.obj!!)
                 override fun canConvert(cls: Class<*>): Boolean = true
                 override fun toJson(value: Any): String = ""
             }
-            return ShogunDict(md5(json), Klaxon().converter(mapConverter).parse(json)!!)
+            return ShogunDictionary(md5(json), Klaxon().converter(mapConverter).parse(json)!!)
         }
 
         fun readFileDirectlyAsText(fileName: String): String = readFileDirectlyAsText(File(fileName))

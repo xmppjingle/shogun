@@ -28,7 +28,7 @@ class ShogunTester {
 
         val dict = ShogunUtils.importDict(jsonDict)
 
-        assertEquals(p.dict, dict)
+        assertEquals(p.dict, dict!!.map)
 
         println(p.crunched.md5())
 
@@ -53,7 +53,7 @@ class ShogunTester {
 
         val dict = ShogunUtils.importDict(jsonDict)
 
-        assertEquals(p.dict, dict)
+        assertEquals(p.dict, dict!!.map)
 
         println(dict)
 
@@ -81,10 +81,10 @@ class ShogunTester {
 
         val dict = ShogunUtils.importDict(jsonDict)
 
-        assertEquals(p.dict, dict)
+        assertEquals(p.dict, dict!!.map)
 
-        assertEquals(s, Shogun.uncrunch(p.crunched, dict!!) )
-        assertEquals(Shogun.uncrunch(Shogun.crunch(s, p.dict), dict), Shogun.uncrunch(p.crunched, dict!!) )
+        assertEquals(s, Shogun.uncrunch(p.crunched, dict.map))
+        assertEquals(Shogun.uncrunch(Shogun.crunch(s, p.dict), dict.map), Shogun.uncrunch(p.crunched, dict.map))
 
         println(dict)
 
@@ -101,6 +101,6 @@ class ShogunTester {
 
 }
 
-private fun String.md5():String {
+private fun String.md5(): String {
     return ShogunUtils.md5(this)
 }
