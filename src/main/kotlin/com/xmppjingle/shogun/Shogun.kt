@@ -47,6 +47,17 @@ class Shogun {
 
         }
 
+        fun crunch(payload: String, dict: HashMap<String, Int>): String {
+            var crunched = payload
+            dict.forEach {
+                crunched = crunched.replace(it.key, "${it.value.toChar()}")
+//                println("Hanoi Partial: ${uncr}")
+            }
+            println("Crunch Size: ${crunched.length}")
+
+            return crunched
+        }
+
         fun uncrunch(payload: String, dict: HashMap<String, Int>): String {
             var uncr = payload
             dict.forEach {

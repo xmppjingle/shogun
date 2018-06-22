@@ -34,6 +34,8 @@ class ShogunTester {
 
         println(dict)
 
+        assertEquals(testInput, Shogun.uncrunch(p.crunched, p.dict))
+
     }
 
     @Test
@@ -80,6 +82,9 @@ class ShogunTester {
         val dict = ShogunUtils.importDict(jsonDict)
 
         assertEquals(p.dict, dict)
+
+        assertEquals(s, Shogun.uncrunch(p.crunched, dict!!) )
+        assertEquals(Shogun.uncrunch(Shogun.crunch(s, p.dict), dict), Shogun.uncrunch(p.crunched, dict!!) )
 
         println(dict)
 
