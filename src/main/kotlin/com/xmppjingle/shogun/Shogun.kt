@@ -1,31 +1,34 @@
 package com.xmppjingle.shogun
 
-import com.beust.klaxon.Converter
-import com.beust.klaxon.JsonValue
-import com.beust.klaxon.Klaxon
-import java.io.File
 import java.nio.charset.Charset
 import java.nio.charset.CharsetEncoder
 
 class Shogun {
 
+    data class Crunched(
+            val crunched: String,
+            val dict: HashMap<String, Int>
+    )
+
     companion object {
 
         fun crunch(payload: String, minWl: Int, maxWl: Int, layers: Int, charset: Charset) = crunch(payload, minWl, maxWl, layers, charset, emptyList())
-        fun crunch(payload: String, minWl: Int, maxWl: Int, layers: Int, charset: Charset, opening: List<String>): Pair<String, HashMap<String, Int>> {
+        fun crunch(payload: String, minWl: Int, maxWl: Int, layers: Int, charset: Charset, opening: List<String>): Crunched {
 
 //            println("Original Size: ${payload.length}")
 
             val charsetSize = calcCharsetLength(charset)
+            val charsetDelta = calcCharsetLength(Charsets.UTF_8) - charsetSize - 5
+            val depth = if (layers < charsetDelta) layers else charsetDelta
             val dict = HashMap<String, Int>()
             var cr = payload
 
-            for (i in 0..(layers - 1)) {
+            for (i in 0..(depth - 1)) {
 //            println(cr)
                 val word = if (i < opening.size) {
                     opening[i]
                 } else {
-                    val ordered = slash(minWl, maxWl, layers, cr, charset)
+                    val ordered = slash(minWl, maxWl, 3, cr, charset)
                     //            ordered.forEach({ println(it) })
                     if (ordered.isEmpty()) break
                     val entry = ordered[0]
@@ -40,7 +43,7 @@ class Shogun {
 //            println("{{$cr}}")
 //            println("Slashed Size: ${cr.length}")
 
-            return Pair(cr, dict)
+            return Crunched(cr, dict)
 
         }
 
@@ -50,7 +53,7 @@ class Shogun {
                 uncr = uncr.replace("${it.value.toChar()}", it.key)
 //                println("Hanoi Partial: ${uncr}")
             }
-            println("Hanoi Stacked Size: ${uncr.length}")
+            println("Uncrunch Size: ${uncr.length}")
 
             return uncr
         }
@@ -79,9 +82,11 @@ class Shogun {
                     }
                 }
             }
+
             val ordered = t.toList().sortedBy { (_, v) -> v /*+ (k.length * wordLenBonus)*/ }
             if (ordered.isEmpty()) return ordered
-            return ordered.filter { it.second > it.first.length }.reversed()//.subList(0, if (ordered.size > top) top else ordered.size)
+            val r = ordered.filter { it.second > it.first.length }.reversed() //.subList(0, if (ordered.size > top) top else ordered.size)
+            return if (r.isEmpty() || r.size < top) r else r.subList(0, top)
         }
 
         fun validCut(word: String, encoder: CharsetEncoder): Int {
@@ -104,22 +109,6 @@ class Shogun {
             }
             return i + 10
         }
-
-        fun exportDict(map: HashMap<String, Int>): String {
-            return Klaxon().toJsonString(map)
-        }
-
-        fun importDict(json: String): HashMap<String, Int>? {
-            val mapConverter = object : Converter {
-                override fun fromJson(jv: JsonValue): HashMap<String, Any?> = HashMap(jv.obj!!)
-                override fun canConvert(cls: Class<*>): Boolean = true
-                override fun toJson(value: Any): String = ""
-            }
-            return Klaxon().converter(mapConverter).parse(json)
-        }
-
-        fun readFileDirectlyAsText(fileName: String): String = readFileDirectlyAsText(File(fileName))
-        fun readFileDirectlyAsText(file: File): String = file.readText(Charsets.UTF_8)
 
     }
 
