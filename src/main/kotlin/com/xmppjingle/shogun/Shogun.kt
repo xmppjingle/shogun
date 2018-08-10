@@ -15,8 +15,6 @@ class Shogun {
         fun crunch(payload: String, minWl: Int, maxWl: Int, layers: Int, charset: Charset) = crunch(payload, minWl, maxWl, layers, charset, emptyList())
         fun crunch(payload: String, minWl: Int, maxWl: Int, layers: Int, charset: Charset, opening: List<String>): Crunched {
 
-//            println("Original Size: ${payload.length}")
-
             val charsetSize = calcCharsetLength(charset)
             val charsetDelta = calcCharsetLength(Charsets.UTF_8) - charsetSize - 5
             val depth = if (layers < charsetDelta) layers else charsetDelta
@@ -24,24 +22,18 @@ class Shogun {
             var cr = payload
 
             for (i in 0..(depth - 1)) {
-//            println(cr)
                 val word = if (i < opening.size) {
                     opening[i]
                 } else {
                     val ordered = slash(minWl, maxWl, 3, cr, charset)
-                    //            ordered.forEach({ println(it) })
                     if (ordered.isEmpty()) break
                     val entry = ordered[0]
                     entry.first
                 }
                 val rp = (charsetSize + i)
-//                println("$entry for $rp")
                 dict.put(word, rp)
                 cr = cr.replace(word, "${rp.toChar()}", false)
             }
-
-//            println("{{$cr}}")
-//            println("Slashed Size: ${cr.length}")
 
             return Crunched(cr, dict)
 
@@ -54,7 +46,6 @@ class Shogun {
             var crunched = payload
             dict.forEach {
                 crunched = crunched.replace(it.key, "${it.value.toChar()}")
-//                println("Hanoi Partial: ${uncr}")
             }
             println("Crunch Size: ${crunched.length}")
 
@@ -68,7 +59,6 @@ class Shogun {
             var uncr = payload
             dict.forEach {
                 uncr = uncr.replace("${it.value.toChar()}", it.key)
-//                println("Hanoi Partial: ${uncr}")
             }
             println("Uncrunch Size: ${uncr.length}")
 
@@ -79,7 +69,6 @@ class Shogun {
             val t = HashMap<String, Int>()
             val encoder = charset.newEncoder()
             for (wl in minWl..(maxWl)) {
-//                println("Breaking on $wl...")
                 if (wl >= payload.length) break
                 var i = validCut(payload.slice(0..(wl - 1)), encoder)
                 while (i < (payload.length - wl)) {
@@ -91,7 +80,6 @@ class Shogun {
                         if (encoder.canEncode(word[wl - 1])) {
                             t.computeIfPresent(word, { _, u -> u + wl + 2 })
                             t.computeIfAbsent(word, { wl })
-//                        println(word)
                             i++
                         } else {
                             i += wl + 1
