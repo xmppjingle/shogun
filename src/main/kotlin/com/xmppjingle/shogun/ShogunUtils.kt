@@ -38,6 +38,12 @@ class ShogunUtils {
         fun readFileDirectlyAsText(fileName: String): String = readFileDirectlyAsText(File(fileName))
         fun readFileDirectlyAsText(file: File): String = file.readText(Charsets.UTF_8)
 
+        fun writeDictToFile(jsonDict: String) =
+                md5(jsonDict).let{
+                    fname ->
+                        val file = File(fname).writeText(jsonDict)
+                }
+
     }
 
 }

@@ -1,4 +1,5 @@
 import com.xmppjingle.shogun.Shogun
+import com.xmppjingle.shogun.ShogunDictionary
 import com.xmppjingle.shogun.ShogunUtils
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -90,12 +91,26 @@ class ShogunTester {
 
     }
 
+    @Test
     fun testDictListBalance() {
-        val files = File(Thread.currentThread().contextClassLoader.getResources(".").nextElement().path + "/sdp").walk().filter { it.isFile }
+        val files = File(Thread.currentThread().contextClassLoader.getResources(".").nextElement().path + "../resources/sdp").walk().filter { it.isFile }
         val s = files.joinToString { ShogunUtils.readFileDirectlyAsText(it) }
 
-        for (l in 10..50)
-            println("Layers[$l]: ${(Shogun.crunch(s, 4, 60, l, Charsets.US_ASCII).crunched.length).div(s.length.toDouble())}")
+        println(Thread.currentThread().contextClassLoader.getResources(".").nextElement().path + "../resources/")
+
+        var sm:Double = 1.0
+        var sl:Int = 0
+
+        for (l in 30..50) {
+            val c = Shogun.crunch(s, 4, 60, l, Charsets.US_ASCII)
+            val ss = c.crunched.length.div(s.length.toDouble())
+            println("Layers[$l]: $ss")
+
+            if(ss < sm) sl = l
+
+        }
+
+        ShogunUtils.writeDictToFile(ShogunUtils.exportDict(Shogun.crunch(s, 4, 60, sl, Charsets.US_ASCII).dict))
 
     }
 
