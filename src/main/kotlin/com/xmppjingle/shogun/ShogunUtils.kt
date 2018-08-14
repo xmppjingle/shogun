@@ -1,8 +1,6 @@
 package com.xmppjingle.shogun
 
-import com.beust.klaxon.Converter
-import com.beust.klaxon.JsonValue
-import com.beust.klaxon.Klaxon
+import com.beust.klaxon.*
 import java.io.File
 import java.security.MessageDigest
 
@@ -23,7 +21,7 @@ class ShogunUtils {
         }
 
         fun exportDict(map: HashMap<String, Int>): String {
-            return Klaxon().toJsonString(map)
+            return Klaxon().toJsonString(map.map { (k, v) -> Render.escapeString(k) to v }.toMap())
         }
 
         fun importDict(json: String): ShogunDictionary? {
@@ -38,11 +36,24 @@ class ShogunUtils {
         fun readFileDirectlyAsText(fileName: String): String = readFileDirectlyAsText(File(fileName))
         fun readFileDirectlyAsText(file: File): String = file.readText(Charsets.UTF_8)
 
-        fun writeDictToFile(jsonDict: String) =
-                md5(jsonDict).let{
-                    fname ->
-                        val file = File(fname).writeText(jsonDict)
+        fun writeDictToFile(jsonDict: String): File =
+                md5(jsonDict).let { fname ->
+                    val file = File(fname)
+                    file.writeText(jsonDict)
+                    file
                 }
+
+        fun calculateDictFromDir(dir: String, depth: Int, normalizeEOL: Boolean = false): String {
+            val files = File(dir).walk().filter { it.isFile }
+            val s = files.joinToString { ShogunUtils.readFileDirectlyAsText(it) }
+                    .let { if (normalizeEOL) ShogunUtils.normalizeEOL(it) else it }
+            val c = Shogun.crunch(s, 4, 60, depth, Charsets.US_ASCII)
+            return ShogunUtils.exportDict(c.dict)
+        }
+
+        fun normalizeEOL(str: String): String = str
+                .replace("\r\n", "\n")
+                .replace("\r", "\n")
 
     }
 

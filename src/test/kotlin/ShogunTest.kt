@@ -110,7 +110,25 @@ class ShogunTester {
 
         }
 
-        ShogunUtils.writeDictToFile(ShogunUtils.exportDict(Shogun.crunch(s, 4, 60, sl, Charsets.US_ASCII).dict))
+        val c = Shogun.crunch(s, 4, 60, sl, Charsets.US_ASCII)
+        val ed = ShogunUtils.exportDict(c.dict)
+
+        val w = ShogunUtils.writeDictToFile(ed)
+
+        val r = ShogunUtils.importDict(ShogunUtils.readFileDirectlyAsText(w))
+
+        r!!.map.forEach { t, u -> assertEquals(c.dict[t], u) }
+
+        assertEquals(r.md5, ShogunUtils.md5(ed))
+
+    }
+
+    @Test
+    fun testDictCalc() {
+
+        val s = ShogunUtils.calculateDictFromDir(Thread.currentThread().contextClassLoader.getResources(".").nextElement().path + "../resources/sdp", 42)
+
+        println(s)
 
     }
 
