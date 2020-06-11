@@ -13,7 +13,7 @@ class Shogun {
     companion object {
 
         fun crunch(payload: String, minWl: Int, maxWl: Int, layers: Int, charset: Charset) = crunch(payload, minWl, maxWl, layers, charset, emptyList())
-        fun crunch(payload: String, minWl: Int, maxWl: Int, layers: Int, charset: Charset, opening: List<String>): Crunched {
+        fun crunch(payload: String, minWl: Int, maxWl: Int, layers: Int, charset: Charset, opening: List<String> = emptyList(), excludeChars: List<Char> = emptyList()): Crunched {
 
             val charsetSize = calcCharsetLength(charset)
             val charsetDelta = calcCharsetLength(Charsets.UTF_8) - charsetSize - 5
@@ -25,7 +25,7 @@ class Shogun {
                 val word = if (i < opening.size) {
                     opening[i]
                 } else {
-                    val ordered = slash(minWl, maxWl, 3, cr, charset)
+                    val ordered = slash(minWl, maxWl, 3, cr, charset, excludeChars)
                     if (ordered.isEmpty()) break
                     val entry = ordered[0]
                     entry.first
@@ -65,19 +65,20 @@ class Shogun {
             return uncr
         }
 
-        fun slash(minWl: Int, maxWl: Int, top: Int, payload: String, charset: Charset): List<Pair<String, Int>> {
+        fun slash(minWl: Int, maxWl: Int, top: Int, payload: String, charset: Charset, excludeChars: List<Char> = emptyList()): List<Pair<String, Int>> {
             val t = HashMap<String, Int>()
             val encoder = charset.newEncoder()
             for (wl in minWl..(maxWl)) {
                 if (wl >= payload.length) break
-                var i = validCut(payload.slice(0..(wl - 1)), encoder)
+                var i = validCut(payload.slice(0..(wl - 1)), encoder, excludeChars)
                 while (i < (payload.length - wl)) {
                     val word = payload.slice(i..(wl + i - 1))
-                    val cut = validCut(word, encoder)
+                    val cut = validCut(word, encoder, excludeChars)
                     if (cut != 0) {
                         i += cut
                     } else {
-                        if (encoder.canEncode(word[wl - 1])) {
+                        val markChar = word[wl - 1]
+                        if (encoder.canEncode(markChar) && !excludeChars.contains(markChar)) {
                             t.computeIfPresent(word, { _, u -> u + wl + 2 })
                             t.computeIfAbsent(word, { wl })
                             i++
@@ -94,11 +95,11 @@ class Shogun {
             return if (r.isEmpty() || r.size < top) r else r.subList(0, top)
         }
 
-        fun validCut(word: String, encoder: CharsetEncoder): Int {
+        fun validCut(word: String, encoder: CharsetEncoder, excludeChars: List<Char>): Int {
             var i = 0
             var j = 0
             while (j < word.length) {
-                if (!encoder.canEncode(word[j])) {
+                if (!encoder.canEncode(word[j]) || excludeChars.contains(word[j])) {
                     i = j + 1
                 }
                 j++

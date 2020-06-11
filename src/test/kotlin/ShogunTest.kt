@@ -1,5 +1,4 @@
 import com.xmppjingle.shogun.Shogun
-import com.xmppjingle.shogun.ShogunDictionary
 import com.xmppjingle.shogun.ShogunUtils
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -17,7 +16,7 @@ class ShogunTester {
     @Test
     fun testBasic() {
 
-        val testInput = "JingleNodesJingleNodesJingleTestNodesTestFinalNodesJingle"
+        val testInput = "JingleNodes123JingleNodes123JingleTest123NodesTestFinalNodesJingle"
 
         val p = Shogun.crunch(testInput, 4, 30, 6, Charsets.US_ASCII)
 
@@ -42,9 +41,30 @@ class ShogunTester {
     @Test
     fun testNoDeltaCharset() {
 
-        val testInput = "JingleNodesJingleNodesJingleTestNodesTestFinalNodesJingle"
+        val testInput = "JingleNodes123JingleNodes123JingleTestNodesTestFinalNodesJingle"
 
         val p = Shogun.crunch(testInput, 4, 30, 6, Charsets.UTF_8)
+
+        assertEquals(testInput, Shogun.uncrunch(p.crunched, p.dict))
+
+        val jsonDict = ShogunUtils.exportDict(p.dict)
+
+        println(jsonDict)
+
+        val dict = ShogunUtils.importDict(jsonDict)
+
+        assertEquals(p.dict, dict!!.map)
+
+        println(dict)
+
+    }
+
+    @Test
+    fun testCharsetNumbers() {
+
+        val testInput = "JingleNodes123Jingle123NodesJingle123TestNodesTestFinalNodesJingleJingleNodes123Jingle123NodesJingle123TestNodesTestFinalNodesJingle"
+
+        val p = Shogun.crunch(testInput, 3, 30, 6, Charsets.US_ASCII, excludeChars = arrayListOf<Char>('1', '2', '3'))
 
         assertEquals(testInput, Shogun.uncrunch(p.crunched, p.dict))
 
@@ -98,15 +118,15 @@ class ShogunTester {
 
         println(Thread.currentThread().contextClassLoader.getResources(".").nextElement().path + "../resources/")
 
-        var sm:Double = 1.0
-        var sl:Int = 0
+        var sm: Double = 1.0
+        var sl: Int = 0
 
         for (l in 30..50) {
             val c = Shogun.crunch(s, 4, 60, l, Charsets.US_ASCII)
             val ss = c.crunched.length.div(s.length.toDouble())
             println("Layers[$l]: $ss")
 
-            if(ss < sm) sl = l
+            if (ss < sm) sl = l
 
         }
 
