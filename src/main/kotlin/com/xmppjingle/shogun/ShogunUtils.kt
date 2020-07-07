@@ -1,8 +1,12 @@
 package com.xmppjingle.shogun
 
-import com.beust.klaxon.*
+import com.beust.klaxon.Converter
+import com.beust.klaxon.JsonValue
+import com.beust.klaxon.Klaxon
+import com.beust.klaxon.Render
 import java.io.File
 import java.security.MessageDigest
+import kotlin.math.ceil
 
 class ShogunUtils {
 
@@ -54,6 +58,21 @@ class ShogunUtils {
         fun normalizeEOL(str: String): String = str
                 .replace("\r\n", "\n")
                 .replace("\r", "\n")
+
+        fun <T> jumpStepDilute(list: ArrayList<T>, maxSize: Int): ArrayList<T> =
+                if (list.isEmpty() || list.size < maxSize) list
+                else {
+                    arrayListOf<T>().let { dilute ->
+                        if (maxSize > 0) {
+                            val mantissa = ceil((list.size / maxSize).toDouble()).toInt()
+                            for (i in 0 until (maxSize - 1)) {
+                                dilute.add(list[i * mantissa])
+                            }
+                            dilute.add(list.last())
+                        }
+                        dilute
+                    }
+                }
 
     }
 

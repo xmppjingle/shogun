@@ -152,6 +152,17 @@ class ShogunTester {
 
     }
 
+    @Test
+    fun stepDiluteTest(){
+        println("${ShogunUtils.jumpStepDilute(arrayListOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), 5)}")
+        println("${ShogunUtils.jumpStepDilute(arrayListOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), 3)}")
+        println("${ShogunUtils.jumpStepDilute(arrayListOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11), 3)}")
+        println("${ShogunUtils.jumpStepDilute(arrayListOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11), 2)}")
+        println("${ShogunUtils.jumpStepDilute(arrayListOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11), 1)}")
+        println("${ShogunUtils.jumpStepDilute(arrayListOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11), 0)}")
+        println("${ShogunUtils.jumpStepDilute(arrayListOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11), 10)}")
+    }
+
 }
 
 private fun String.md5(): String {
