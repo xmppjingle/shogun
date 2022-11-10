@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "com.github.xmppjingle"
-version = "0.0.11"
+version = "0.1.0"
 java.sourceCompatibility = JavaVersion.VERSION_1_9
 
 repositories {
