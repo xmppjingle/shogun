@@ -36,3 +36,6 @@ shogun.iml
 **/.DS_Store
 build/**
 build/kotlin-build/version.txt
+
+# Ignore Gradle build output directory
+build
