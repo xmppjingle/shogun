@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.github.xmppjingle"
-version = "0.1.12"
+version = "0.1.13"
 java.sourceCompatibility = JavaVersion.VERSION_1_9
 
 repositories {
@@ -37,6 +37,18 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.0")
 
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "com.xmppjingle"
+            artifactId = "shogun"
+            version = "0.1.13"
+
+            from(components["java"])
+        }
+    }
 }
 
 tasks {
