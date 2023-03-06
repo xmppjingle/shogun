@@ -47,7 +47,7 @@ class Shogun {
             dict.forEach {
                 crunched = crunched.replace(it.key, "${it.value.toChar()}")
             }
-            println("Crunch Size: ${crunched.length}")
+            //println("Crunch Size: ${crunched.length}")
 
             return crunched
         }
@@ -60,7 +60,7 @@ class Shogun {
             dict.forEach {
                 uncr = uncr.replace("${it.value.toChar()}", it.key)
             }
-            println("Uncrunch Size: ${uncr.length}")
+            //println("Uncrunch Size: ${uncr.length}")
 
             return uncr
         }
