@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.github.xmppjingle"
-version = "0.1.13"
+version = "0.1.15"
 java.sourceCompatibility = JavaVersion.VERSION_1_9
 
 repositories {
@@ -44,7 +44,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "com.xmppjingle"
             artifactId = "shogun"
-            version = "0.1.13"
+            version = "0.1.15"
 
             from(components["java"])
         }
