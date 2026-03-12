@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     // Apply the Kotlin JVM plugin to add support for Kotlin.
-    id("org.jetbrains.kotlin.jvm") version "1.3.61"
+    id("org.jetbrains.kotlin.jvm") version "1.9.22"
 
     // Apply the java-library plugin for API and implementation separation.
     `java-library`
@@ -11,12 +11,16 @@ plugins {
 
 group = "com.github.xmppjingle"
 version = "0.1.15"
-java.sourceCompatibility = JavaVersion.VERSION_1_9
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
 
 repositories {
-    jcenter()
-    maven { url =uri("https://jitpack.io") }
     mavenCentral()
+    maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
@@ -27,16 +31,38 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
     implementation("com.beust:klaxon:5.5")
+}
 
-    // Use the Kotlin test library.
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter("5.9.0")
+            
+            dependencies {
+                implementation("org.jetbrains.kotlin:kotlin-test")
+                implementation("org.jetbrains.kotlin:kotlin-test-junit5:1.9.22")
+            }
+        }
+    }
+}
 
-    // Use the Kotlin JUnit integration.
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+tasks {
+    withType<KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = "17"
+        }
+    }
+}
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.0")
+tasks.register<Jar>("sourcesJar") {
+    archiveClassifier.set("sources")
+    from(sourceSets.main.get().allSource)
+}
 
+tasks.register<Jar>("javadocJar") {
+    archiveClassifier.set("javadoc")
+    from(tasks.javadoc)
+    dependsOn(tasks.javadoc)
 }
 
 publishing {
@@ -47,27 +73,9 @@ publishing {
             version = "0.1.15"
 
             from(components["java"])
+
+            artifact(tasks.named("sourcesJar").get())
+            artifact(tasks.named("javadocJar").get())
         }
     }
-}
-
-tasks {
-
-    val sourcesJar by creating(Jar::class) {
-        archiveClassifier.set("sources")
-        from(sourceSets.main.get().allSource)
-    }
-
-    val javadocJar by creating(Jar::class) {
-        dependsOn.add(javadoc)
-        archiveClassifier.set("javadoc")
-        from(javadoc)
-    }
-
-    artifacts {
-        archives(sourcesJar)
-        archives(javadocJar)
-        archives(jar)
-    }
-
 }

@@ -43,7 +43,7 @@ class ShogunTester {
 
         val testInput = "JingleNodes123JingleNodes123JingleTestNodesTestFinalNodesJingle"
 
-        val p = Shogun.crunch(testInput, 4, 30, 6, Charsets.UTF_8)
+        val p = Shogun.crunch(testInput, 4, 30, 60, Charsets.UTF_8)
 
         assertEquals(testInput, Shogun.uncrunch(p.crunched, p.dict))
 
@@ -109,6 +109,36 @@ class ShogunTester {
 
         println(dict)
 
+    }
+
+    @Test
+    fun testDictListCustom() {
+        val resourcePath = Thread.currentThread().contextClassLoader.getResource("ch")?.path
+            ?: throw IllegalStateException("Could not find test resources directory")
+        val files = File(resourcePath).walk().filter { it.isFile }
+        val s = files.joinToString { ShogunUtils.readFileDirectlyAsText(it) }
+
+        val p = Shogun.crunch(s, 4, 22, 12, Charsets.ISO_8859_1)
+
+        assertEquals(s, Shogun.uncrunch(p.crunched, p.dict))
+
+        val jsonDict = ShogunUtils.exportDict(p.dict)
+
+        println(jsonDict)
+
+        val dict = ShogunUtils.importDict(jsonDict)
+
+        assertEquals(p.dict, dict!!.map)
+
+        assertEquals(s, Shogun.uncrunch(p.crunched, dict.map))
+        assertEquals(Shogun.uncrunch(Shogun.crunch(s, p.dict), dict.map), Shogun.uncrunch(p.crunched, dict.map))
+
+        val crunchedSize = Shogun.crunch(s, p.dict).length
+        println(crunchedSize)
+        println("Size efficiency (original: ${s.length} compressed:$crunchedSize): ${crunchedSize.div(s.length.toDouble())}")
+        assertEquals(s, Shogun.uncrunch(Shogun.crunch(s, p.dict), dict.map))
+
+        println(Shogun.crunch(s, p.dict))
     }
 
     @Test
