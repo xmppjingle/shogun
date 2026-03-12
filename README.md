@@ -65,3 +65,6 @@ println("Dictionary Export: ${ShogunUtils.exportDict(c.dict)}")
 
 ## Applicability
 This library and mechanism is effective for SIP SDP, WebRTC SDP, SIP Calling signalling, etc...
+
+## Changelog
+See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
