@@ -2,6 +2,9 @@ package com.xmppjingle.shogun
 
 import java.nio.charset.Charset
 import java.nio.charset.CharsetEncoder
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
 
 class Shogun {
 
@@ -47,8 +50,6 @@ class Shogun {
             dict.forEach {
                 crunched = crunched.replace(it.key, "${it.value.toChar()}")
             }
-            //println("Crunch Size: ${crunched.length}")
-
             return crunched
         }
 
@@ -60,15 +61,54 @@ class Shogun {
             dict.forEach {
                 uncr = uncr.replace("${it.value.toChar()}", it.key)
             }
-            //println("Uncrunch Size: ${uncr.length}")
-
             return uncr
         }
 
+        /**
+         * Parallel frequency analysis using Java 21 virtual threads.
+         * Each word length is processed concurrently, then results are merged.
+         */
         fun slash(minWl: Int, maxWl: Int, top: Int, payload: String, charset: Charset, excludeChars: List<Char> = emptyList()): List<Pair<String, Int>> {
+            if (payload.isEmpty()) return emptyList()
+
+            val effectiveMaxWl = minOf(maxWl, payload.length - 1)
+            if (minWl > effectiveMaxWl) return emptyList()
+
+            // For small ranges or short payloads, use single-threaded path
+            val wordLengthRange = minWl..effectiveMaxWl
+            if (wordLengthRange.count() <= 2 || payload.length < 200) {
+                return slashSequential(minWl, effectiveMaxWl, top, payload, charset, excludeChars)
+            }
+
+            // Use virtual threads to parallelize across word lengths
+            val merged = ConcurrentHashMap<String, Int>()
+            Executors.newVirtualThreadPerTaskExecutor().use { executor ->
+                val futures = mutableListOf<Future<*>>()
+                for (wl in wordLengthRange) {
+                    futures.add(executor.submit {
+                        val encoder = charset.newEncoder()
+                        val localMap = slashForWordLength(wl, payload, encoder, excludeChars)
+                        localMap.forEach { (word, score) ->
+                            merged.merge(word, score) { a, b -> a + b }
+                        }
+                    })
+                }
+                futures.forEach { it.get() }
+            }
+
+            val ordered = merged.toList().sortedBy { (_, v) -> v }
+            if (ordered.isEmpty()) return ordered
+            val r = ordered.filter { it.second > it.first.length }.reversed()
+            return if (r.isEmpty() || r.size < top) r else r.subList(0, top)
+        }
+
+        /**
+         * Sequential fallback for small inputs (avoids virtual thread overhead).
+         */
+        private fun slashSequential(minWl: Int, maxWl: Int, top: Int, payload: String, charset: Charset, excludeChars: List<Char>): List<Pair<String, Int>> {
             val t = HashMap<String, Int>()
             val encoder = charset.newEncoder()
-            for (wl in minWl..(maxWl)) {
+            for (wl in minWl..maxWl) {
                 if (wl >= payload.length) break
                 var i = validCut(payload.slice(0..(wl - 1)), encoder, excludeChars)
                 while (i < (payload.length - wl)) {
@@ -79,8 +119,8 @@ class Shogun {
                     } else {
                         val markChar = word[wl - 1]
                         if (encoder.canEncode(markChar) && !excludeChars.contains(markChar)) {
-                            t.computeIfPresent(word, { _, u -> u + wl + 2 })
-                            t.computeIfAbsent(word, { wl })
+                            t.computeIfPresent(word) { _, u -> u + wl + 2 }
+                            t.computeIfAbsent(word) { wl }
                             i++
                         } else {
                             i += wl + 1
@@ -89,10 +129,37 @@ class Shogun {
                 }
             }
 
-            val ordered = t.toList().sortedBy { (_, v) -> v /*+ (k.length * wordLenBonus)*/ }
+            val ordered = t.toList().sortedBy { (_, v) -> v }
             if (ordered.isEmpty()) return ordered
-            val r = ordered.filter { it.second > it.first.length }.reversed() //.subList(0, if (ordered.size > top) top else ordered.size)
+            val r = ordered.filter { it.second > it.first.length }.reversed()
             return if (r.isEmpty() || r.size < top) r else r.subList(0, top)
+        }
+
+        /**
+         * Process a single word length - designed to be run in a virtual thread.
+         */
+        private fun slashForWordLength(wl: Int, payload: String, encoder: CharsetEncoder, excludeChars: List<Char>): HashMap<String, Int> {
+            val t = HashMap<String, Int>()
+            if (wl >= payload.length) return t
+
+            var i = validCut(payload.slice(0..(wl - 1)), encoder, excludeChars)
+            while (i < (payload.length - wl)) {
+                val word = payload.slice(i..(wl + i - 1))
+                val cut = validCut(word, encoder, excludeChars)
+                if (cut != 0) {
+                    i += cut
+                } else {
+                    val markChar = word[wl - 1]
+                    if (encoder.canEncode(markChar) && !excludeChars.contains(markChar)) {
+                        t.computeIfPresent(word) { _, u -> u + wl + 2 }
+                        t.computeIfAbsent(word) { wl }
+                        i++
+                    } else {
+                        i += wl + 1
+                    }
+                }
+            }
+            return t
         }
 
         fun validCut(word: String, encoder: CharsetEncoder, excludeChars: List<Char>): Int {

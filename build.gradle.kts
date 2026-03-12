@@ -1,8 +1,6 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     // Apply the Kotlin JVM plugin to add support for Kotlin.
-    id("org.jetbrains.kotlin.jvm") version "1.9.22"
+    id("org.jetbrains.kotlin.jvm") version "2.0.21"
 
     // Apply the java-library plugin for API and implementation separation.
     `java-library`
@@ -10,11 +8,11 @@ plugins {
 }
 
 group = "com.github.xmppjingle"
-version = "0.1.15"
+version = "0.2.0"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
 
@@ -27,29 +25,29 @@ dependencies {
     // Align versions of all Kotlin components
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
 
-    // Use the Kotlin JDK 8 standard library.
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    // Use the Kotlin standard library.
+    implementation("org.jetbrains.kotlin:kotlin-stdlib")
 
-    implementation("com.beust:klaxon:5.5")
+    implementation("com.beust:klaxon:5.6")
 }
 
 testing {
     suites {
         val test by getting(JvmTestSuite::class) {
-            useJUnitJupiter("5.9.0")
-            
+            useJUnitJupiter("5.11.3")
+
             dependencies {
                 implementation("org.jetbrains.kotlin:kotlin-test")
-                implementation("org.jetbrains.kotlin:kotlin-test-junit5:1.9.22")
+                implementation("org.jetbrains.kotlin:kotlin-test-junit5")
             }
         }
     }
 }
 
 tasks {
-    withType<KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = "17"
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
         }
     }
 }
@@ -70,7 +68,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "com.xmppjingle"
             artifactId = "shogun"
-            version = "0.1.15"
+            version = "0.2.0"
 
             from(components["java"])
 
