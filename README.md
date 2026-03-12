@@ -1,10 +1,24 @@
 # Shogun
 UTF-8 Text Based Compression for Short Texts and Protocols using subset Charsets of UTF-8.
 
-# Mechanism
+## Version Comparison
+
+| Component | v0.1.x | v0.2.0 |
+|-----------|--------|--------|
+| Java | 17 | **21** |
+| Kotlin | 1.9.22 | **2.0.21** |
+| Gradle | 8.5 | **8.10** |
+| JUnit | 5.9.0 | **5.11.3** |
+| Klaxon | 5.5 | **5.6** |
+| Thread Model | Single-threaded | **Virtual Threads (Project Loom)** |
+| `slash()` analysis | Sequential across word lengths | **Parallel per word length** |
+| File I/O (`calculateDictFromDir`) | Sequential reads | **Parallel reads via virtual threads** |
+| Tests | 9 | **13** |
+
+## Mechanism
 Naive substitution consists in the replacement of frequent char sequences contained within a Charset, for unused chars within UTF-8 that do not belong to the content Charset.
 For instance the char sequence "TestLongSequence:" within a text block, known to be US ASCII only, can be replace for the single UTF-8 char 'Á'.
- 
+
 The substitutions are represented in a dictionary(HashMap) of which keys are the char sequences (String) and the values are the respective UTF-8 codepoint used to represent the sequence.
 
 In summary, it uses a substitution of frequent char sequences for unused chars within UTF-8.
@@ -12,16 +26,22 @@ For instance the char sequence "TestLongSequence:" within a text block, known to
 
 The efficient of this mechanism depends intrinsically on the defined dictionary. Which this library provides as main feature.
 
-# Calculation of Substitution Dictionary
-The calculation of optimal Dictionary for specific domain protocols, languages and texts, is implementation specific. But also can be done in an arbitrary way with a human defined dictionary.
-In case of this library it uses bayesian and permutation heuristics to calculate an approximated optional dictionary for the given input training data. 
+## Performance (v0.2.0)
 
-# Dictionary Format
+The `slash()` frequency analysis — the most CPU-intensive operation — now runs each word length scan in its own **Java 21 virtual thread**, with results merged via `ConcurrentHashMap`. A sequential fallback is used for small inputs to avoid thread overhead.
+
+File-based dictionary calculation (`calculateDictFromDir`) also reads files in parallel using virtual threads.
+
+## Calculation of Substitution Dictionary
+The calculation of optimal Dictionary for specific domain protocols, languages and texts, is implementation specific. But also can be done in an arbitrary way with a human defined dictionary.
+In case of this library it uses bayesian and permutation heuristics to calculate an approximated optional dictionary for the given input training data.
+
+## Dictionary Format
 The dictionary consists in a HashMap<String, Int> that can be represented in a JSON file, containing the String and Integer pairs.
 I.E.:
 
 ```json
-{  
+{
    "http://www.webrtc.org/experiments/rtp-hdrext/":138,
    "sendrecv":147,
    "\na=":148,
@@ -30,7 +50,7 @@ I.E.:
 }
 ```
 
-# Usage Example
+## Usage Example
 
 ```kotlin
 val testInput = "JingleNodesJingleNodesJingleTestNodesTestFinalNodesJingle"
@@ -42,5 +62,8 @@ println("Dictionary Export: ${ShogunUtils.exportDict(c.dict)}")
 
 ```
 
-# Applicability
+## Applicability
 This library and mechanism is effective for SIP SDP, WebRTC SDP, SIP Calling signalling, etc...
+
+## Changelog
+See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.

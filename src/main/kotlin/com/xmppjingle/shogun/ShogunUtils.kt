@@ -6,6 +6,7 @@ import com.beust.klaxon.Klaxon
 import com.beust.klaxon.Render
 import java.io.File
 import java.security.MessageDigest
+import java.util.concurrent.Executors
 import kotlin.math.ceil
 
 class ShogunUtils {
@@ -47,12 +48,28 @@ class ShogunUtils {
                     file
                 }
 
+        /**
+         * Calculate dictionary from directory using virtual threads for parallel file reading.
+         */
         fun calculateDictFromDir(dir: String, depth: Int, normalizeEOL: Boolean = false): String {
-            val files = File(dir).walk().filter { it.isFile }
-            val s = files.joinToString { ShogunUtils.readFileDirectlyAsText(it) }
-                    .let { if (normalizeEOL) ShogunUtils.normalizeEOL(it) else it }
+            val fileList = File(dir).walk().filter { it.isFile }.toList()
+
+            // Read files in parallel using virtual threads
+            val contents = if (fileList.size > 1) {
+                Executors.newVirtualThreadPerTaskExecutor().use { executor ->
+                    val futures = fileList.map { file ->
+                        executor.submit<String> { readFileDirectlyAsText(file) }
+                    }
+                    futures.map { it.get() }
+                }
+            } else {
+                fileList.map { readFileDirectlyAsText(it) }
+            }
+
+            val s = contents.joinToString()
+                    .let { if (normalizeEOL) normalizeEOL(it) else it }
             val c = Shogun.crunch(s, 4, 60, depth, Charsets.US_ASCII)
-            return ShogunUtils.exportDict(c.dict)
+            return exportDict(c.dict)
         }
 
         fun normalizeEOL(str: String): String = str
