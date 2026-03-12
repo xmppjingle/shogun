@@ -14,7 +14,6 @@ All notable changes to this project will be documented in this file.
 - `calculateDictFromDir()` reads files in parallel using virtual threads when multiple files are present.
 
 ### Added
-- `kotlinx-coroutines-core` 1.8.1 dependency
 - 4 new tests: `testVirtualThreadsUsedForLargePayload`, `testParallelConsistency`, `testLargePayloadCompression`, `testEmptyAndEdgeCases`
 
 ### Backward Compatibility

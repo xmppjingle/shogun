@@ -28,9 +28,6 @@ dependencies {
     // Use the Kotlin standard library.
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
 
-    // Kotlin coroutines for structured concurrency with virtual threads
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
-
     implementation("com.beust:klaxon:5.6")
 }
 
@@ -42,7 +39,6 @@ testing {
             dependencies {
                 implementation("org.jetbrains.kotlin:kotlin-test")
                 implementation("org.jetbrains.kotlin:kotlin-test-junit5")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
             }
         }
     }

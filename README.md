@@ -10,7 +10,6 @@ UTF-8 Text Based Compression for Short Texts and Protocols using subset Charsets
 | Gradle | 8.5 | **8.10** |
 | JUnit | 5.9.0 | **5.11.3** |
 | Klaxon | 5.5 | **5.6** |
-| Coroutines | — | **1.8.1** |
 | Thread Model | Single-threaded | **Virtual Threads (Project Loom)** |
 | `slash()` analysis | Sequential across word lengths | **Parallel per word length** |
 | File I/O (`calculateDictFromDir`) | Sequential reads | **Parallel reads via virtual threads** |
