@@ -7,4 +7,11 @@
  * in the user manual at https://docs.gradle.org/6.1.1/userguide/multi_project_builds.html
  */
 
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 rootProject.name = "shogun"
